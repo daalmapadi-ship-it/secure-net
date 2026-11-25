@@ -1,0 +1,21 @@
+function notFoundHandler(req, res) {
+  res.status(404).json({
+    success: false,
+    message: "Ruta no encontrada."
+  });
+}
+
+function errorHandler(error, req, res, next) {
+  const statusCode = error.statusCode || 500;
+
+  if (statusCode >= 500) {
+    console.error(error);
+  }
+
+  res.status(statusCode).json({
+    success: false,
+    message: error.message || "Error interno del servidor."
+  });
+}
+
+module.exports = { notFoundHandler, errorHandler };

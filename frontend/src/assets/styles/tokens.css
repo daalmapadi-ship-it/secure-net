@@ -1,0 +1,18 @@
+:root {
+  --sn-navy: #071833;
+  --sn-navy-deep: #0a2348;
+  --sn-navy-mid: #12305f;
+  --sn-electric: #1a8cff;
+  --sn-electric-bright: #3aa0ff;
+  --sn-white: #ffffff;
+  --sn-ice: #f4f8fd;
+  --sn-muted: #6b7c94;
+  --sn-border: rgba(18, 48, 95, 0.12);
+  --sn-danger: #c62828;
+  --sn-success: #1b7a4a;
+  --sn-shadow: 0 16px 40px rgba(7, 24, 51, 0.12);
+  --sn-radius: 14px;
+  --sn-font: "Segoe UI", system-ui, -apple-system, sans-serif;
+  --sn-gradient: linear-gradient(135deg, #071833 0%, #12305f 52%, #1a8cff 160%);
+  --sn-gradient-soft: linear-gradient(180deg, #0a2348 0%, #071833 100%);
+}
