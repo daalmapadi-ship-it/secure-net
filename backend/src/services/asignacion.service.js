@@ -1,5 +1,6 @@
 const { pool } = require("../config/db");
 const { HttpError } = require("../utils/httpError");
+const { insertAndGetId } = require("../utils/insert");
 
 const ESTADOS_PERMITIDOS = ["activo", "finalizado"];
 
@@ -214,14 +215,22 @@ async function createAsignacion(payload) {
   }
 
   try {
-    const [result] = await pool.query(
-      `INSERT INTO asignaciones
-        (id_cliente, id_servicio, id_usuario, fecha_inicio, fecha_fin, estado, observaciones)
-       VALUES (?, ?, ?, ?, ?, ?, ?)`,
-      [idCliente, idServicio, idUsuario, fechaInicio, fechaFin, estado, observaciones]
-    );
+    const idAsignacion = await insertAndGetId({
+      table: "asignaciones",
+      idColumn: "id_asignacion",
+      columns: [
+        "id_cliente",
+        "id_servicio",
+        "id_usuario",
+        "fecha_inicio",
+        "fecha_fin",
+        "estado",
+        "observaciones"
+      ],
+      values: [idCliente, idServicio, idUsuario, fechaInicio, fechaFin, estado, observaciones]
+    });
 
-    return findById(result.insertId);
+    return findById(idAsignacion);
   } catch (error) {
     if (error.code === "ER_NO_REFERENCED_ROW_2") {
       throw new HttpError(400, "El cliente, servicio o usuario indicado no existe.");

@@ -1,5 +1,6 @@
 const { pool } = require("../config/db");
 const { HttpError } = require("../utils/httpError");
+const { insertAndGetId } = require("../utils/insert");
 const categoriaService = require("./categoria.service");
 
 const SERVICIO_SELECT = `
@@ -108,13 +109,14 @@ async function createServicio(payload) {
 
   await ensureCategoriaExiste(idCategoria);
 
-  const [result] = await pool.query(
-    `INSERT INTO servicios (id_categoria, nombre, descripcion, precio_base, activo)
-     VALUES (?, ?, ?, ?, 1)`,
-    [idCategoria, nombre, descripcion, precioBase]
-  );
+  const idServicio = await insertAndGetId({
+    table: "servicios",
+    idColumn: "id_servicio",
+    columns: ["id_categoria", "nombre", "descripcion", "precio_base", "activo"],
+    values: [idCategoria, nombre, descripcion, precioBase, 1]
+  });
 
-  return findById(result.insertId);
+  return findById(idServicio);
 }
 
 async function updateServicio(id, payload) {

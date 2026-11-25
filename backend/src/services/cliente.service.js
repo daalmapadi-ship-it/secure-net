@@ -1,5 +1,6 @@
 const { pool } = require("../config/db");
 const { HttpError } = require("../utils/httpError");
+const { insertAndGetId } = require("../utils/insert");
 const { isValidEmail } = require("../middlewares/validate.middleware");
 
 const CLIENTE_SELECT = `
@@ -130,14 +131,25 @@ async function createCliente(payload) {
   }
 
   try {
-    const [result] = await pool.query(
-      `INSERT INTO clientes
-        (tipo_doc, num_doc, razon_social, nombres, apellidos, correo, telefono, direccion, ciudad, activo)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)`,
-      [tipoDoc, numDoc, razonSocial, nombres, apellidos, correo, telefono, direccion, ciudad]
-    );
+    const idCliente = await insertAndGetId({
+      table: "clientes",
+      idColumn: "id_cliente",
+      columns: [
+        "tipo_doc",
+        "num_doc",
+        "razon_social",
+        "nombres",
+        "apellidos",
+        "correo",
+        "telefono",
+        "direccion",
+        "ciudad",
+        "activo"
+      ],
+      values: [tipoDoc, numDoc, razonSocial, nombres, apellidos, correo, telefono, direccion, ciudad, 1]
+    });
 
-    return findById(result.insertId);
+    return findById(idCliente);
   } catch (error) {
     if (error.code === "ER_DUP_ENTRY") {
       throw new HttpError(409, "Ya existe un cliente con este número de documento.");

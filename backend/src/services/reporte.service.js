@@ -1,5 +1,6 @@
 const { pool } = require("../config/db");
 const { HttpError } = require("../utils/httpError");
+const { insertAndGetId } = require("../utils/insert");
 
 const REPORTE_SELECT = `
   SELECT
@@ -114,13 +115,14 @@ async function createReporte(payload, idUsuarioGenerador) {
   await ensureUsuarioActivo(idUsuario);
 
   try {
-    const [result] = await pool.query(
-      `INSERT INTO reportes (id_usuario, tipo, titulo, parametros)
-       VALUES (?, ?, ?, ?)`,
-      [idUsuario, tipo, titulo, parametros]
-    );
+    const idReporte = await insertAndGetId({
+      table: "reportes",
+      idColumn: "id_reporte",
+      columns: ["id_usuario", "tipo", "titulo", "parametros"],
+      values: [idUsuario, tipo, titulo, parametros]
+    });
 
-    return findById(result.insertId);
+    return findById(idReporte);
   } catch (error) {
     if (error.code === "ER_NO_REFERENCED_ROW_2") {
       throw new HttpError(400, "El usuario indicado no existe.");

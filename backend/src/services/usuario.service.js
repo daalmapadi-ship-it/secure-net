@@ -1,5 +1,6 @@
 const { pool } = require("../config/db");
 const { HttpError } = require("../utils/httpError");
+const { insertAndGetId } = require("../utils/insert");
 const { hashPassword, comparePassword } = require("../utils/password");
 const { isValidEmail } = require("../middlewares/validate.middleware");
 
@@ -116,13 +117,14 @@ async function createUsuario(payload) {
   const claveHash = await hashPassword(clave);
 
   try {
-    const [result] = await pool.query(
-      `INSERT INTO usuarios (id_rol, nombres, apellidos, correo, clave_hash, activo)
-       VALUES (?, ?, ?, ?, ?, 1)`,
-      [idRol, nombres, apellidos, correo, claveHash]
-    );
+    const idUsuario = await insertAndGetId({
+      table: "usuarios",
+      idColumn: "id_usuario",
+      columns: ["id_rol", "nombres", "apellidos", "correo", "clave_hash", "activo"],
+      values: [idRol, nombres, apellidos, correo, claveHash, 1]
+    });
 
-    return findById(result.insertId);
+    return findById(idUsuario);
   } catch (error) {
     if (error.code === "ER_DUP_ENTRY") {
       throw new HttpError(409, "Ya existe un usuario con este correo.");

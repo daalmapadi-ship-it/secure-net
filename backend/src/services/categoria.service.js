@@ -1,5 +1,6 @@
 const { pool } = require("../config/db");
 const { HttpError } = require("../utils/httpError");
+const { insertAndGetId } = require("../utils/insert");
 
 const CATEGORIA_SELECT = `
   SELECT id_categoria, nombre, descripcion
@@ -99,12 +100,14 @@ async function createCategoria(payload) {
     throw new HttpError(409, "Ya existe una categoría con este nombre.");
   }
 
-  const [result] = await pool.query(
-    "INSERT INTO categorias_servicio (nombre, descripcion) VALUES (?, ?)",
-    [nombre, descripcion]
-  );
+  const idCategoria = await insertAndGetId({
+    table: "categorias_servicio",
+    idColumn: "id_categoria",
+    columns: ["nombre", "descripcion"],
+    values: [nombre, descripcion]
+  });
 
-  return findById(result.insertId);
+  return findById(idCategoria);
 }
 
 async function updateCategoria(id, payload) {
