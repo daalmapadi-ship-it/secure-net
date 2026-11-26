@@ -2,8 +2,19 @@ import { useEffect, useMemo, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { crearReporte, listarReportes, obtenerReporte } from "../services/reporte.service";
 import { listarUsuarios } from "../services/usuario.service";
+import { exportToCsv, fullName } from "../utils/exportCsv";
 
 const WRITE_ROLES = ["administrador", "supervisor"];
+
+const CSV_COLUMNS = [
+  { header: "ID", value: (r) => r.id_reporte },
+  { header: "Tipo", value: (r) => r.tipo },
+  { header: "Título", value: (r) => r.titulo },
+  { header: "Generado por", value: (r) => fullName(r.usuario) || r.usuario?.correo },
+  { header: "Rol", value: (r) => r.usuario?.rol },
+  { header: "Fecha de generación", value: (r) => r.generado_en },
+  { header: "Parámetros", value: (r) => r.parametros }
+];
 const EMPTY_FILTERS = { id_usuario: "", tipo: "" };
 const EMPTY_FORM = { tipo: "", titulo: "", parametros: "" };
 
@@ -323,13 +334,23 @@ export function ReportesPage() {
               : "Consulta el historial de reportes. Tu rol no puede generar registros."}
           </p>
         </div>
-        {canWrite ? (
-          <button type="button" className="sn-btn" onClick={openCreate} disabled={saving || detailLoading}>
-            Generar reporte
+        <div className="sn-actions">
+          <button
+            type="button"
+            className="sn-btn sn-btn-ghost"
+            onClick={() => exportToCsv("reportes", CSV_COLUMNS, reportes)}
+            disabled={listLoading || reportes.length === 0}
+          >
+            Exportar CSV
           </button>
-        ) : (
-          <span className="sn-cell-sub">Solo consulta</span>
-        )}
+          {canWrite ? (
+            <button type="button" className="sn-btn" onClick={openCreate} disabled={saving || detailLoading}>
+              Generar reporte
+            </button>
+          ) : (
+            <span className="sn-cell-sub">Solo consulta</span>
+          )}
+        </div>
       </div>
 
       {notice ? (

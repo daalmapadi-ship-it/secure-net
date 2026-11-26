@@ -7,9 +7,20 @@ import {
   listarUsuarios,
   obtenerUsuario
 } from "../services/usuario.service";
+import { exportToCsv } from "../utils/exportCsv";
 
 const WRITE_ROLE = "administrador";
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+const CSV_COLUMNS = [
+  { header: "ID", value: (u) => u.id_usuario },
+  { header: "Nombres", value: (u) => u.nombres },
+  { header: "Apellidos", value: (u) => u.apellidos },
+  { header: "Correo", value: (u) => u.correo },
+  { header: "Rol", value: (u) => u.rol?.nombre_rol },
+  { header: "Estado", value: (u) => (u.activo ? "Activo" : "Inactivo") },
+  { header: "Fecha de registro", value: (u) => u.creado_en }
+];
 
 const EMPTY_FORM = {
   id_rol: "",
@@ -301,11 +312,21 @@ export function UsuariosPage() {
               : "Consulta de usuarios. Tu rol no puede crear ni modificar registros."}
           </p>
         </div>
-        {canWrite ? (
-          <button type="button" className="sn-btn" onClick={openCreate} disabled={busy || rolesMissing}>
-            Nuevo usuario
+        <div className="sn-actions">
+          <button
+            type="button"
+            className="sn-btn sn-btn-ghost"
+            onClick={() => exportToCsv("usuarios", CSV_COLUMNS, usuarios)}
+            disabled={listLoading || usuarios.length === 0}
+          >
+            Exportar CSV
           </button>
-        ) : null}
+          {canWrite ? (
+            <button type="button" className="sn-btn" onClick={openCreate} disabled={busy || rolesMissing}>
+              Nuevo usuario
+            </button>
+          ) : null}
+        </div>
       </div>
 
       {notice ? (

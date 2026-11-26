@@ -10,9 +10,24 @@ import {
 import { listClientes } from "../services/cliente.service";
 import { listServicios } from "../services/servicio.service";
 import { listarUsuarios } from "../services/usuario.service";
+import { exportToCsv, fullName } from "../utils/exportCsv";
 
 const WRITE_ROLES = ["administrador", "supervisor", "comercial"];
 const ESTADOS = ["activo", "finalizado"];
+
+const CSV_COLUMNS = [
+  { header: "ID", value: (a) => a.id_asignacion },
+  { header: "Cliente", value: (a) => a.cliente?.razon_social || fullName(a.cliente) },
+  { header: "Documento cliente", value: (a) => a.cliente?.num_doc },
+  { header: "Servicio", value: (a) => a.servicio?.nombre },
+  { header: "Precio base (COP)", value: (a) => a.servicio?.precio_base },
+  { header: "Usuario responsable", value: (a) => fullName(a.usuario) },
+  { header: "Correo responsable", value: (a) => a.usuario?.correo },
+  { header: "Fecha inicio", value: (a) => a.fecha_inicio },
+  { header: "Fecha fin", value: (a) => a.fecha_fin },
+  { header: "Estado", value: (a) => a.estado },
+  { header: "Observaciones", value: (a) => a.observaciones }
+];
 
 const EMPTY_FORM = {
   id_cliente: "",
@@ -400,11 +415,21 @@ export function AsignacionesPage() {
               : "Consulta de asignaciones. Tu rol no puede crear ni modificar registros."}
           </p>
         </div>
-        {canWrite ? (
-          <button type="button" className="sn-btn" onClick={openCreate} disabled={busy}>
-            Nueva asignación
+        <div className="sn-actions">
+          <button
+            type="button"
+            className="sn-btn sn-btn-ghost"
+            onClick={() => exportToCsv("asignaciones", CSV_COLUMNS, asignaciones)}
+            disabled={listLoading || asignaciones.length === 0}
+          >
+            Exportar CSV
           </button>
-        ) : null}
+          {canWrite ? (
+            <button type="button" className="sn-btn" onClick={openCreate} disabled={busy}>
+              Nueva asignación
+            </button>
+          ) : null}
+        </div>
       </div>
 
       {notice ? (
@@ -699,7 +724,7 @@ export function AsignacionesPage() {
 
                 <div className="sn-field">
                   <label htmlFor="observaciones">Observaciones</label>
-                  <span className="sn-input-shell">
+                  <span className={`sn-input-shell${fieldErrors.observaciones ? " is-invalid" : ""}`}>
                     <textarea
                       id="observaciones"
                       className="sn-input-plain"

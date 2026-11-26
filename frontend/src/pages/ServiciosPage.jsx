@@ -14,8 +14,18 @@ import {
   setServicioEstado,
   updateServicio
 } from "../services/servicio.service";
+import { exportToCsv } from "../utils/exportCsv";
 
 const WRITE_ROLES = ["administrador", "supervisor"];
+
+const CSV_COLUMNS = [
+  { header: "ID", value: (s) => s.id_servicio },
+  { header: "Nombre", value: (s) => s.nombre },
+  { header: "Categoría", value: (s) => s.categoria?.nombre },
+  { header: "Descripción", value: (s) => s.descripcion },
+  { header: "Precio base (COP)", value: (s) => s.precio_base },
+  { header: "Estado", value: (s) => (s.activo ? "Activo" : "Inactivo") }
+];
 
 const EMPTY_SERVICIO = {
   id_categoria: "",
@@ -485,11 +495,21 @@ export function ServiciosPage() {
           <h2>Catálogo de servicios</h2>
           <p className="sn-muted">Nombre, categoría, precio y estado de cada servicio.</p>
         </div>
-        {canWrite ? (
-          <button type="button" className="sn-btn" onClick={openCreateServicio} disabled={busy}>
-            Nuevo servicio
+        <div className="sn-actions">
+          <button
+            type="button"
+            className="sn-btn sn-btn-ghost"
+            onClick={() => exportToCsv("servicios", CSV_COLUMNS, servicios)}
+            disabled={serviciosLoading || servicios.length === 0}
+          >
+            Exportar CSV
           </button>
-        ) : null}
+          {canWrite ? (
+            <button type="button" className="sn-btn" onClick={openCreateServicio} disabled={busy}>
+              Nuevo servicio
+            </button>
+          ) : null}
+        </div>
       </div>
 
       {serviciosError ? (

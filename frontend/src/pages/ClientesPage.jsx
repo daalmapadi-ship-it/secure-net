@@ -7,8 +7,22 @@ import {
   setClienteEstado,
   updateCliente
 } from "../services/cliente.service";
+import { exportToCsv, fullName } from "../utils/exportCsv";
 
 const WRITE_ROLES = ["administrador", "supervisor", "comercial"];
+
+const CSV_COLUMNS = [
+  { header: "ID", value: (c) => c.id_cliente },
+  { header: "Tipo documento", value: (c) => c.tipo_doc },
+  { header: "Número documento", value: (c) => c.num_doc },
+  { header: "Razón social", value: (c) => c.razon_social },
+  { header: "Nombres y apellidos", value: (c) => fullName(c) },
+  { header: "Correo", value: (c) => c.correo },
+  { header: "Teléfono", value: (c) => c.telefono },
+  { header: "Dirección", value: (c) => c.direccion },
+  { header: "Ciudad", value: (c) => c.ciudad },
+  { header: "Estado", value: (c) => (c.activo ? "Activo" : "Inactivo") }
+];
 const TIPO_DOC_OPTIONS = ["CC", "CE", "NIT", "TI", "PA", "PEP", "PPT", "RC"];
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -300,11 +314,21 @@ export function ClientesPage() {
               : "Consulta de clientes. Tu rol no puede crear ni modificar registros."}
           </p>
         </div>
-        {canWrite ? (
-          <button type="button" className="sn-btn" onClick={openCreate}>
-            Nuevo cliente
+        <div className="sn-actions">
+          <button
+            type="button"
+            className="sn-btn sn-btn-ghost"
+            onClick={() => exportToCsv("clientes", CSV_COLUMNS, clientes)}
+            disabled={listLoading || clientes.length === 0}
+          >
+            Exportar CSV
           </button>
-        ) : null}
+          {canWrite ? (
+            <button type="button" className="sn-btn" onClick={openCreate}>
+              Nuevo cliente
+            </button>
+          ) : null}
+        </div>
       </div>
 
       {notice ? (
